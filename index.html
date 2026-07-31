@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Berk — About Me</title>
+<meta name="description" content="Berk — I make stuff for the web. Schedule 2.0, an audio visualizer, and a few other things.">
+<style>
+  :root{
+    --ink:#0A0A0B; --ink-2:#121214; --panel:#141416; --line:#232326;
+    --line-soft:#1B1B1E; --text:#F4F4F5; --text-dim:#8A8A91; --slate:#4A4A50;
+    --amber:#D97435; --amber-dim:#D9743518; --amber-line:#D9743540; --on-amber:#0A0A0B;
+    --blue:#5B8DEF; --green:#4FA97F; --purple:#9B7EDE; --red:#D9564E;
+    --radius:10px; --radius-lg:14px;
+    --snap:cubic-bezier(.2,.9,.25,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:var(--ink); color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.6;
+  }
+
+  /* grid backdrop, same trick as the promo */
+  .backdrop{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(var(--ink-2) 1px, transparent 1px),
+      linear-gradient(90deg, var(--ink-2) 1px, transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(ellipse 70% 55% at 50% 20%, black, transparent);
+    -webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 20%, black, transparent);
+    opacity:.5;
+  }
+
+  .wrap{position:relative; z-index:1; max-width:860px; margin:0 auto; padding:0 24px 100px;}
+
+  /* ── hero ── */
+  header{padding:110px 0 70px;}
+  .eyebrow{
+    display:inline-block; font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--amber); border:1px solid var(--amber-line); background:var(--amber-dim);
+    padding:5px 11px; border-radius:100px; margin-bottom:22px;
+  }
+  h1{
+    font-size:clamp(42px,8vw,76px); line-height:1.02; letter-spacing:-.035em;
+    font-weight:700; margin-bottom:20px;
+  }
+  h1 .accent{color:var(--amber);}
+  .lede{font-size:clamp(16px,2.4vw,19px); color:var(--text-dim); max-width:56ch;}
+
+  /* ── socials ── */
+  .socials{display:flex; flex-wrap:wrap; gap:10px; margin-top:34px;}
+  .social{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:9px 15px; border:1px solid var(--line); border-radius:100px;
+    background:var(--panel); color:var(--text); text-decoration:none;
+    font-size:14px; font-weight:500;
+    transition:border-color .18s var(--snap), transform .18s var(--snap), background .18s ease;
+  }
+  .social:hover{border-color:var(--amber-line); background:var(--amber-dim); transform:translateY(-2px);}
+  .social svg{width:16px; height:16px; fill:currentColor; flex-shrink:0;}
+  .social.soon{opacity:.42; pointer-events:none;}
+
+  /* ── sections ── */
+  section{margin-top:78px;}
+  .sec-head{
+    display:flex; align-items:baseline; gap:12px;
+    padding-bottom:14px; margin-bottom:26px; border-bottom:1px solid var(--line-soft);
+  }
+  h2{font-size:13px; letter-spacing:.15em; text-transform:uppercase; color:var(--text-dim); font-weight:600;}
+  .count{font-size:12px; color:var(--slate); font-variant-numeric:tabular-nums;}
+
+  /* ── project cards ── */
+  .projects{display:grid; gap:14px;}
+  .card{
+    display:block; text-decoration:none; color:inherit;
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:22px 24px; position:relative; overflow:hidden;
+    transition:border-color .2s var(--snap), transform .2s var(--snap);
+  }
+  .card::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:2px;
+    background:var(--dot,var(--amber)); opacity:0; transition:opacity .2s ease;
+  }
+  .card:hover{border-color:#2E2E33; transform:translateY(-2px);}
+  .card:hover::before{opacity:1;}
+  .card-top{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:9px;}
+  .card h3{font-size:18px; font-weight:600; letter-spacing:-.01em;}
+  .dot{width:7px; height:7px; border-radius:50%; background:var(--dot,var(--amber)); flex-shrink:0;}
+  .tag{
+    font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:600;
+    padding:3px 8px; border-radius:5px; color:var(--text-dim);
+    background:var(--ink-2); border:1px solid var(--line);
+  }
+  .tag.flag{color:var(--amber); border-color:var(--amber-line); background:var(--amber-dim);}
+  .card p{font-size:14.5px; color:var(--text-dim); max-width:64ch;}
+  .stack{display:flex; flex-wrap:wrap; gap:6px; margin-top:14px;}
+  .chip{font-size:11.5px; color:var(--slate); border:1px solid var(--line-soft); padding:3px 9px; border-radius:100px;}
+
+  /* ── about prose ── */
+  .prose p{color:var(--text-dim); font-size:15.5px; margin-bottom:14px; max-width:66ch;}
+  .prose strong{color:var(--text); font-weight:600;}
+
+  footer{
+    margin-top:90px; padding-top:26px; border-top:1px solid var(--line-soft);
+    font-size:13px; color:var(--slate);
+  }
+
+  @media (max-width:560px){
+    header{padding:72px 0 54px;}
+    .card{padding:18px 18px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important; animation:none !important;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+<div class="backdrop"></div>
+
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">About me</span>
+    <h1>Hey, I'm <span class="accent">Berk</span>.</h1>
+    <p class="lede">
+      I make stuff for the web. Usually it starts because I wanted the thing to exist and nobody
+      had made it yet — a schedule app that doesn't suck, a visualizer, a commit graph that's
+      actually fun to look at. Here's most of it.
+    </p>
+
+    <nav class="socials">
+      <a class="social" href="https://github.com/berkisodd" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        GitHub
+      </a>
+      <a class="social" href="https://berkisodd.github.io/schedule/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM1.5 8a6.5 6.5 0 0 1 .2-1.6h2.9a15 15 0 0 0 0 3.2H1.7A6.5 6.5 0 0 1 1.5 8Zm4.6 1.6a13.4 13.4 0 0 1 0-3.2h3.8a13.4 13.4 0 0 1 0 3.2H6.1Zm8.2-3.2a6.5 6.5 0 0 1 0 3.2h-2.9a15 15 0 0 0 0-3.2h2.9Zm-.7-1.5h-2.5a10 10 0 0 0-1-2.7 6.5 6.5 0 0 1 3.5 2.7ZM8 1.6c.6.6 1.2 1.6 1.6 3.3H6.4C6.8 3.2 7.4 2.2 8 1.6Zm-2.1-.4a10 10 0 0 0-1 2.7H2.4a6.5 6.5 0 0 1 3.5-2.7Zm-3.5 9.7h2.5a10 10 0 0 0 1 2.7 6.5 6.5 0 0 1-3.5-2.7Zm5.6 3.1c-.6-.6-1.2-1.6-1.6-3.1h3.2c-.4 1.5-1 2.5-1.6 3.1Zm2.1.4a10 10 0 0 0 1-2.7h2.5a6.5 6.5 0 0 1-3.5 2.7Z"/></svg>
+        Schedule 2.0
+      </a>
+      <a class="social" href="mailto:berkaktenlol@gmail.com">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 3h13a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5Zm.5 1.7v7.3h12V4.7L8 8.9 2 4.7Zm11-.2H3L8 7.7l5-3.2Z"/></svg>
+        Email
+      </a>
+    </nav>
+  </header>
+
+  <section id="work">
+    <div class="sec-head">
+      <h2>Stuff I've made</h2>
+      <span class="count">05</span>
+    </div>
+
+    <div class="projects">
+
+      <a class="card" style="--dot:var(--amber)" href="https://github.com/berkisodd/schedule" target="_blank" rel="noopener">
+        <div class="card-top">
+          <span class="dot"></span>
+          <h3>Schedule 2.0</h3>
+          <span class="tag flag">Main project</span>
+        </div>
+        <p>
+          The big one. It's my class schedule, but actually good — day and week views, a countdown
+          to your next period, and it shows you who else has the same classes as you. You can send
+          someone a view-only link (or a QR code) and there's a chat in there too. Installs to your
+          home screen and still works with no signal.
+        </p>
+        <div class="stack">
+          <span class="chip">PWA</span><span class="chip">Service Worker</span>
+          <span class="chip">Lottie</span><span class="chip">QR codes</span>
+          <span class="chip">Offline-first</span>
+        </div>
+      </a>
+
+      <a class="card" style="--dot:var(--purple)" href="https://github.com/berkisodd/Something-cool" target="_blank" rel="noopener">
+        <div class="card-top">
+          <span class="dot"></span>
+          <h3>Something Cool</h3>
+          <span class="tag">Promo</span>
+        </div>
+        <p>
+          Basically a trailer for Schedule 2.0. It plays through the app scene by scene inside a
+          phone frame — camera flying in on the logo, black bars, the whole movie thing. There's no
+          video file, it's all CSS animation. I probably spent longer on this than I should have.
+        </p>
+        <div class="stack">
+          <span class="chip">CSS 3D</span><span class="chip">Keyframes</span>
+          <span class="chip">Motion design</span>
+        </div>
+      </a>
+
+      <a class="card" style="--dot:var(--green)" href="https://github.com/berkisodd/Terrain" target="_blank" rel="noopener">
+        <div class="card-top">
+          <span class="dot"></span>
+          <h3>Terrain</h3>
+          <span class="tag">Data viz</span>
+        </div>
+        <p>
+          I thought the little green contribution squares were boring, so I turned mine into a
+          landscape. Weeks where I actually committed things stick up like mountains. The rest is
+          pretty flat, which is honest at least.
+        </p>
+        <div class="stack">
+          <span class="chip">GitHub API</span><span class="chip">Canvas</span>
+          <span class="chip">Visualization</span>
+        </div>
+      </a>
+
+      <a class="card" style="--dot:var(--blue)" href="https://github.com/berkisodd/Seemusic" target="_blank" rel="noopener">
+        <div class="card-top">
+          <span class="dot"></span>
+          <h3>Seemusic</h3>
+          <span class="tag">Audio</span>
+        </div>
+        <p>
+          Put a song in and watch it move. It reads the actual frequencies coming out of the track
+          and draws them in real time. Not useful for anything, I just wanted to see what music
+          looks like.
+        </p>
+        <div class="stack">
+          <span class="chip">Web Audio API</span><span class="chip">Canvas</span>
+          <span class="chip">FFT</span>
+        </div>
+      </a>
+
+      <a class="card" style="--dot:var(--red)" href="https://github.com/berkisodd/Demo-notifications-test" target="_blank" rel="noopener">
+        <div class="card-top">
+          <span class="dot"></span>
+          <h3>Notifications Test</h3>
+          <span class="tag">Lab</span>
+        </div>
+        <p>
+          Not really a project, more of a test bench. Notifications were being annoying in Schedule
+          so I pulled them out into their own page until I figured out why. Left it up because it
+          was useful.
+        </p>
+        <div class="stack">
+          <span class="chip">Notifications API</span><span class="chip">Service Worker</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="sec-head">
+      <h2>A bit more</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Nearly all of this is <strong>one HTML file</strong>. No build step, no npm install, nothing to
+        set up — you open it and it works. Partly that's taste, partly it's because I got tired of
+        fighting tooling when I just wanted to make the thing.
+      </p>
+      <p>
+        The part I get stuck on is usually how something <strong>feels</strong>. Whether a menu slides
+        in from the right or the left, how long a button takes to respond, holding to delete instead of
+        an "are you sure?" popup. Small stuff, but it's the difference between an app you tolerate and
+        one you like using.
+      </p>
+      <p>
+        Mostly plain JavaScript and CSS. I'll pick up whatever the project needs — that's how I ended
+        up learning Canvas, Web Audio, and service workers.
+      </p>
+      <p>
+        If you want to talk about any of it, my email's up top.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    Built by Berk · <a href="https://github.com/berkisodd" style="color:var(--text-dim);">@berkisodd</a>
+  </footer>
+
+</div>
+</body>
+</html>
