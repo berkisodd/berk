@@ -64,6 +64,37 @@
   .social svg{width:16px; height:16px; fill:currentColor; flex-shrink:0;}
   .social.soon{opacity:.42; pointer-events:none;}
 
+  /* ── now playing ── */
+  .now-playing{
+    display:flex; align-items:center; gap:10px;
+    margin-top:18px; padding:7px 16px 7px 7px;
+    border:1px solid var(--line); border-radius:100px;
+    background:var(--panel); text-decoration:none; color:inherit;
+    max-width:fit-content;
+    transition:border-color .18s var(--snap), transform .18s var(--snap);
+  }
+  .now-playing:hover{border-color:var(--amber-line); transform:translateY(-2px);}
+  .now-playing[hidden]{display:none;}
+  .np-art{width:32px; height:32px; border-radius:50%; object-fit:cover; background:var(--ink-2); flex-shrink:0;}
+  .np-text{display:flex; flex-direction:column; gap:1px; min-width:0;}
+  .np-status{
+    font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--slate);
+    display:flex; align-items:center; gap:6px;
+  }
+  .np-pulse{width:6px; height:6px; border-radius:50%; background:var(--slate); flex-shrink:0;}
+  .np-song{font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px;}
+  .np-song .np-artist{color:var(--text-dim); font-weight:400;}
+  .np-song .np-track{font-weight:600;}
+  .now-playing.live .np-pulse{
+    background:var(--green); box-shadow:0 0 0 0 rgba(79,169,127,.5); animation:np-pulse 1.8s infinite;
+  }
+  .now-playing.live .np-status{color:var(--green);}
+  @keyframes np-pulse{
+    0%{box-shadow:0 0 0 0 rgba(79,169,127,.5);}
+    70%{box-shadow:0 0 0 6px rgba(79,169,127,0);}
+    100%{box-shadow:0 0 0 0 rgba(79,169,127,0);}
+  }
+
   /* ── sections ── */
   section{margin-top:78px;}
   .sec-head{
@@ -147,6 +178,14 @@
         Email
       </a>
     </nav>
+
+    <a id="now-playing" class="now-playing" href="https://last.fm" target="_blank" rel="noopener" hidden>
+      <img class="np-art" alt="" width="32" height="32">
+      <span class="np-text">
+        <span class="np-status"><span class="np-pulse"></span><span class="np-status-label">Last played</span></span>
+        <span class="np-song"><span class="np-track"></span> <span class="np-artist"></span></span>
+      </span>
+    </a>
   </header>
 
   <section id="work">
@@ -277,5 +316,45 @@
   </footer>
 
 </div>
+
+<script>
+  // Fill these in: get a free key at https://www.last.fm/api/account/create
+  const LASTFM_API_KEY = 'YOUR_LASTFM_API_KEY';
+  const LASTFM_USER = 'YOUR_LASTFM_USERNAME';
+
+  async function updateNowPlaying(){
+    const el = document.getElementById('now-playing');
+    if (!LASTFM_API_KEY || LASTFM_API_KEY === 'YOUR_LASTFM_API_KEY') return;
+
+    try{
+      const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks`
+        + `&user=${encodeURIComponent(LASTFM_USER)}&api_key=${encodeURIComponent(LASTFM_API_KEY)}`
+        + `&format=json&limit=1`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('lastfm request failed');
+      const data = await res.json();
+      const track = data && data.recenttracks && data.recenttracks.track && data.recenttracks.track[0];
+      if (!track) { el.hidden = true; return; }
+
+      const isPlaying = !!(track['@attr'] && track['@attr'].nowplaying === 'true');
+      const art = (track.image && track.image.find(i => i.size === 'medium') || {})['#text'];
+      const artist = track.artist && track.artist['#text'];
+
+      el.href = track.url || 'https://last.fm';
+      el.querySelector('.np-art').src = art || '';
+      el.querySelector('.np-art').style.visibility = art ? 'visible' : 'hidden';
+      el.querySelector('.np-track').textContent = track.name || '';
+      el.querySelector('.np-artist').textContent = artist ? `— ${artist}` : '';
+      el.querySelector('.np-status-label').textContent = isPlaying ? 'Listening now' : 'Last played';
+      el.classList.toggle('live', isPlaying);
+      el.hidden = false;
+    }catch(err){
+      el.hidden = true;
+    }
+  }
+
+  updateNowPlaying();
+  setInterval(updateNowPlaying, 30000);
+</script>
 </body>
 </html>
