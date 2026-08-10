@@ -329,8 +329,8 @@
     try{
       const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks`
         + `&user=${encodeURIComponent(LASTFM_USER)}&api_key=${encodeURIComponent(LASTFM_API_KEY)}`
-        + `&format=json&limit=1`;
-      const res = await fetch(url);
+        + `&format=json&limit=1&_=${Date.now()}`;
+      const res = await fetch(url, { cache: 'no-store' });
       if (!res.ok) throw new Error('lastfm request failed');
       const data = await res.json();
       const rawTrack = data && data.recenttracks && data.recenttracks.track;
@@ -356,7 +356,7 @@
   }
 
   updateNowPlaying();
-  setInterval(updateNowPlaying, 30000);
+  setInterval(updateNowPlaying, 3000);
 </script>
 </body>
 </html>
