@@ -333,7 +333,9 @@
       const res = await fetch(url);
       if (!res.ok) throw new Error('lastfm request failed');
       const data = await res.json();
-      const track = data && data.recenttracks && data.recenttracks.track && data.recenttracks.track[0];
+      const rawTrack = data && data.recenttracks && data.recenttracks.track;
+      // Last.fm returns a single object instead of an array when there's only one track (e.g. nowplaying with no history yet)
+      const track = Array.isArray(rawTrack) ? rawTrack[0] : rawTrack;
       if (!track) { el.hidden = true; return; }
 
       const isPlaying = !!(track['@attr'] && track['@attr'].nowplaying === 'true');
