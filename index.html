@@ -96,16 +96,27 @@
   }
 
   /* ── discord status ── */
-  .dc-dot{width:10px; height:10px; border-radius:50%; flex-shrink:0; background:var(--slate);}
+  .dc-avatar-wrap{position:relative; flex-shrink:0; width:32px; height:32px;}
+  .dc-avatar{width:32px; height:32px; border-radius:50%; object-fit:cover; background:var(--ink-2); display:block;}
+  .dc-dot{
+    position:absolute; right:-2px; bottom:-2px; width:12px; height:12px;
+    border-radius:50%; border:2px solid var(--panel); background:var(--slate);
+  }
   .dc-dot.online{background:var(--green);}
   .dc-dot.idle{background:#E8B93B;}
   .dc-dot.dnd{background:var(--red);}
   .dc-dot.offline{background:var(--slate);}
-  .dc-label{font-size:13px; color:var(--text); font-weight:600;}
-  .dc-activity{
-    font-size:12px; color:var(--text-dim);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px;
+  .dc-status-label.online{color:var(--green);}
+  .dc-status-label.idle{color:#E8B93B;}
+  .dc-status-label.dnd{color:var(--red);}
+  .dc-status-label.offline{color:var(--slate);}
+  .dc-line{
+    font-size:13px; color:var(--text);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:240px;
   }
+  .dc-name{font-weight:600;}
+  .dc-username{color:var(--text-dim); font-weight:400; font-size:12px;}
+  .dc-activity{color:var(--text-dim); font-weight:400;}
 
   /* ── sections ── */
   section{margin-top:78px;}
@@ -200,10 +211,14 @@
     </a>
 
     <a id="discord-status" class="now-playing" href="#" target="_blank" rel="noopener" hidden>
-      <span class="dc-dot offline"></span>
+      <span class="dc-avatar-wrap">
+        <img class="dc-avatar" alt="" width="32" height="32">
+        <span class="dc-dot offline"></span>
+      </span>
       <span class="np-text">
-        <span class="dc-label">Offline</span>
-        <span class="dc-activity"></span>
+        <span class="np-status"><span class="dc-status-label offline">Offline</span></span>
+        <span class="dc-line"><span class="dc-name"></span> <span class="dc-username"></span></span>
+        <span class="dc-line dc-activity"></span>
       </span>
     </a>
   </header>
@@ -394,6 +409,7 @@
       if (!json.success || !json.data) { el.hidden = true; return; }
 
       const d = json.data;
+      const user = d.discord_user || {};
       const status = d.discord_status || 'offline';
       const labels = { online: 'Online', idle: 'Idle', dnd: 'Do not disturb', offline: 'Offline' };
 
@@ -402,9 +418,18 @@
       const playing = activities.find(a => a.type === 0);
       const activityText = (customStatus && customStatus.state) || (playing && `Playing ${playing.name}`) || '';
 
+      const avatarUrl = user.avatar
+        ? `https://cdn.discordapp.com/avatars/${DISCORD_USER_ID}/${user.avatar}.png?size=64`
+        : '';
+
       el.href = `https://discord.com/users/${DISCORD_USER_ID}`;
+      el.querySelector('.dc-avatar').src = avatarUrl;
+      el.querySelector('.dc-avatar').style.visibility = avatarUrl ? 'visible' : 'hidden';
       el.querySelector('.dc-dot').className = `dc-dot ${status}`;
-      el.querySelector('.dc-label').textContent = labels[status] || 'Offline';
+      el.querySelector('.dc-status-label').className = `dc-status-label ${status}`;
+      el.querySelector('.dc-status-label').textContent = labels[status] || 'Offline';
+      el.querySelector('.dc-name').textContent = user.global_name || user.username || '';
+      el.querySelector('.dc-username').textContent = user.username ? `@${user.username}` : '';
       el.querySelector('.dc-activity').textContent = activityText;
       el.querySelector('.dc-activity').style.display = activityText ? 'block' : 'none';
       el.hidden = false;
