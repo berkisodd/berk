@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Berk — About Me</title>
-<meta name="description" content="Berk — I make stuff for the web. Schedule 2.0, an audio visualizer, and a few other things.">
+<title>Berk · About Me</title>
+<meta name="description" content="Berk. I make stuff for the web. Schedule 2.0, an audio visualizer, and a few other things.">
 <style>
   :root{
     --ink:#0A0A0B; --ink-2:#121214; --panel:#141416; --line:#232326;
@@ -160,7 +160,7 @@
     <h1>Hey, I'm <span class="accent">Berk</span>.</h1>
     <p class="lede">
       I make stuff for the web. Usually it starts because I wanted the thing to exist and nobody
-      had made it yet — a schedule app that doesn't suck, a visualizer, a commit graph that's
+      had made it yet: a schedule app that doesn't suck, a visualizer, a commit graph that's
       actually fun to look at. Here's most of it.
     </p>
 
@@ -203,15 +203,15 @@
           <span class="tag flag">Main project</span>
         </div>
         <p>
-          The big one. It's my class schedule, but actually good — day and week views, a countdown
+          The big one. It's my class schedule, but actually good: day and week views, a countdown
           to your next period, and it shows you who else has the same classes as you. You can send
-          someone a view-only link (or a QR code) and there's a chat in there too. Installs to your
+          someone a view only link (or a QR code) and there's a chat in there too. Installs to your
           home screen and still works with no signal.
         </p>
         <div class="stack">
           <span class="chip">PWA</span><span class="chip">Service Worker</span>
           <span class="chip">Lottie</span><span class="chip">QR codes</span>
-          <span class="chip">Offline-first</span>
+          <span class="chip">Offline first</span>
         </div>
       </a>
 
@@ -223,7 +223,7 @@
         </div>
         <p>
           Basically a trailer for Schedule 2.0. It plays through the app scene by scene inside a
-          phone frame — camera flying in on the logo, black bars, the whole movie thing. There's no
+          phone frame, camera flying in on the logo, black bars, the whole movie thing. There's no
           video file, it's all CSS animation. I probably spent longer on this than I should have.
         </p>
         <div class="stack">
@@ -292,7 +292,7 @@
     <div class="prose">
       <p>
         Nearly all of this is <strong>one HTML file</strong>. No build step, no npm install, nothing to
-        set up — you open it and it works. Partly that's taste, partly it's because I got tired of
+        set up. You open it and it works. Partly that's taste, partly it's because I got tired of
         fighting tooling when I just wanted to make the thing.
       </p>
       <p>
@@ -302,7 +302,7 @@
         one you like using.
       </p>
       <p>
-        Mostly plain JavaScript and CSS. I'll pick up whatever the project needs — that's how I ended
+        Mostly plain JavaScript and CSS. I'll pick up whatever the project needs. That's how I ended
         up learning Canvas, Web Audio, and service workers.
       </p>
       <p>
@@ -346,7 +346,7 @@
       el.querySelector('.np-art').src = art || '';
       el.querySelector('.np-art').style.visibility = art ? 'visible' : 'hidden';
       el.querySelector('.np-track').textContent = track.name || '';
-      el.querySelector('.np-artist').textContent = artist ? `— ${artist}` : '';
+      el.querySelector('.np-artist').textContent = artist ? `by ${artist}` : '';
       el.querySelector('.np-status-label').textContent = isPlaying ? 'Listening now' : 'Last played';
       el.classList.toggle('live', isPlaying);
       el.hidden = false;
