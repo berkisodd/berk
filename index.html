@@ -95,6 +95,18 @@
     100%{box-shadow:0 0 0 0 rgba(79,169,127,0);}
   }
 
+  /* ── discord status ── */
+  .dc-dot{width:10px; height:10px; border-radius:50%; flex-shrink:0; background:var(--slate);}
+  .dc-dot.online{background:var(--green);}
+  .dc-dot.idle{background:#E8B93B;}
+  .dc-dot.dnd{background:var(--red);}
+  .dc-dot.offline{background:var(--slate);}
+  .dc-label{font-size:13px; color:var(--text); font-weight:600;}
+  .dc-activity{
+    font-size:12px; color:var(--text-dim);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px;
+  }
+
   /* ── sections ── */
   section{margin-top:78px;}
   .sec-head{
@@ -184,6 +196,14 @@
       <span class="np-text">
         <span class="np-status"><span class="np-pulse"></span><span class="np-status-label">Last played</span></span>
         <span class="np-song"><span class="np-track"></span> <span class="np-artist"></span></span>
+      </span>
+    </a>
+
+    <a id="discord-status" class="now-playing" href="#" target="_blank" rel="noopener" hidden>
+      <span class="dc-dot offline"></span>
+      <span class="np-text">
+        <span class="dc-label">Offline</span>
+        <span class="dc-activity"></span>
       </span>
     </a>
   </header>
@@ -357,6 +377,44 @@
 
   updateNowPlaying();
   setInterval(updateNowPlaying, 3000);
+
+  // Fill this in: your Discord user ID (enable Developer Mode in Discord settings,
+  // then right click your own profile and Copy User ID). You also need to join
+  // the Lanyard Discord server once: https://discord.gg/lanyard
+  const DISCORD_USER_ID = 'YOUR_DISCORD_USER_ID';
+
+  async function updateDiscordStatus(){
+    const el = document.getElementById('discord-status');
+    if (!DISCORD_USER_ID || DISCORD_USER_ID === 'YOUR_DISCORD_USER_ID') return;
+
+    try{
+      const res = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}?_=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error('lanyard request failed');
+      const json = await res.json();
+      if (!json.success || !json.data) { el.hidden = true; return; }
+
+      const d = json.data;
+      const status = d.discord_status || 'offline';
+      const labels = { online: 'Online', idle: 'Idle', dnd: 'Do not disturb', offline: 'Offline' };
+
+      const activities = d.activities || [];
+      const customStatus = activities.find(a => a.type === 4);
+      const playing = activities.find(a => a.type === 0);
+      const activityText = (customStatus && customStatus.state) || (playing && `Playing ${playing.name}`) || '';
+
+      el.href = `https://discord.com/users/${DISCORD_USER_ID}`;
+      el.querySelector('.dc-dot').className = `dc-dot ${status}`;
+      el.querySelector('.dc-label').textContent = labels[status] || 'Offline';
+      el.querySelector('.dc-activity').textContent = activityText;
+      el.querySelector('.dc-activity').style.display = activityText ? 'block' : 'none';
+      el.hidden = false;
+    }catch(err){
+      el.hidden = true;
+    }
+  }
+
+  updateDiscordStatus();
+  setInterval(updateDiscordStatus, 3000);
 </script>
 </body>
 </html>
