@@ -355,6 +355,10 @@
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 3h13a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5Zm.5 1.7v7.3h12V4.7L8 8.9 2 4.7Zm11-.2H3L8 7.7l5-3.2Z"/></svg>
         Email
       </a>
+      <button class="social" id="term-trigger" type="button" title="or press &#96;">
+        <span aria-hidden="true">&gt;_</span>
+        Terminal
+      </button>
     </nav>
 
     <a id="now-playing" class="now-playing" href="https://last.fm" target="_blank" rel="noopener" hidden>
@@ -705,6 +709,7 @@
     const body = document.getElementById('term-body');
     const input = document.getElementById('term-input');
     const closeBtn = document.getElementById('term-close');
+    const trigger = document.getElementById('term-trigger');
     let termOpen = false;
     let cmdHistory = [];
     let historyIdx = 0;
@@ -856,6 +861,7 @@
     });
     body.addEventListener('click', () => input.focus());
     closeBtn.addEventListener('click', closeTerm);
+    trigger.addEventListener('click', openTerm);
 
     window.addEventListener('keydown', e => {
       if (e.key === '`' || e.key === '~'){
