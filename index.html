@@ -84,6 +84,54 @@
   .glitch-mode .wrap{animation:glitch-shake .15s linear 10;}
   .glitch-mode .backdrop{opacity:.8; filter:hue-rotate(70deg);}
 
+  /* ── terminal easter egg ── */
+  .term-overlay{
+    position:fixed; inset:0; z-index:120;
+    background:rgba(0,0,0,.55);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+  }
+  .term-overlay[hidden]{display:none;}
+  .term-window{
+    width:640px; max-width:100%; height:420px; max-height:80vh;
+    background:#1A1A1B; border:1px solid var(--line-2); border-radius:6px;
+    display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 24px 70px rgba(0,0,0,.55);
+  }
+  .term-titlebar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 12px; background:#232324; border-bottom:1px solid var(--line-2);
+    font-family:var(--mono); font-size:12px; color:var(--muted); flex-shrink:0;
+  }
+  .term-close{
+    background:none; border:none; color:var(--muted); font-family:var(--mono);
+    font-size:15px; line-height:1; cursor:pointer; padding:2px 7px; border-radius:3px;
+  }
+  .term-close:hover{background:var(--line-2); color:var(--paper);}
+  .term-body{
+    flex:1; overflow-y:auto; padding:12px 14px;
+    font-family:var(--mono); font-size:13px; color:#D8D8D3;
+    cursor:text;
+  }
+  .term-lines{white-space:pre-wrap; word-break:break-word;}
+  .term-lines .line{margin-bottom:2px;}
+  .term-lines .out{color:#B7B5AC;}
+  .term-lines .err{color:var(--red);}
+  .term-lines .term-user{color:var(--green); font-weight:700;}
+  .term-lines .term-sep{color:var(--muted);}
+  .term-lines .term-path{color:var(--blue); font-weight:700;}
+  .term-lines .term-dollar{color:var(--muted); margin-right:6px;}
+  .term-inputline{display:flex; align-items:center;}
+  .term-prompt{display:inline-flex; align-items:center; font-weight:700; white-space:nowrap;}
+  .term-prompt .term-user{color:var(--green);}
+  .term-prompt .term-sep{color:var(--muted);}
+  .term-prompt .term-path{color:var(--blue);}
+  .term-prompt .term-dollar{color:var(--muted); margin-left:2px; margin-right:8px;}
+  .term-input{
+    flex:1; min-width:0; background:none; border:none; outline:none; color:#D8D8D3;
+    font-family:var(--mono); font-size:13px; caret-color:var(--acid);
+  }
+
   .wrap{position:relative; z-index:1; max-width:860px; margin:0 auto; padding:0 24px 90px;}
 
   /* ── hero ── */
@@ -267,6 +315,22 @@
 <div class="cursor-dot" id="cursor-dot"></div>
 <div class="toast" id="toast">Konami accepted. Nice.</div>
 
+<div class="term-overlay" id="term-overlay" hidden>
+  <div class="term-window" role="dialog" aria-label="Terminal" aria-modal="true">
+    <div class="term-titlebar">
+      <span>berk@berk: ~</span>
+      <button class="term-close" id="term-close" aria-label="Close terminal" type="button">×</button>
+    </div>
+    <div class="term-body" id="term-body">
+      <div class="term-lines" id="term-lines"></div>
+      <div class="term-inputline">
+        <span class="term-prompt"><span class="term-user">berk@berk</span><span class="term-sep">:</span><span class="term-path">~</span><span class="term-dollar">$</span></span>
+        <input class="term-input" id="term-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal input">
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="wrap">
 
   <header>
@@ -319,8 +383,8 @@
 
   <div class="ticker">
     <div class="ticker-track">
-      <span>NO BUILD STEP · ONE HTML FILE · SCHEDULE 2.0 · LIVE NOW PLAYING · MADE IN THE BROWSER · TRY THE KONAMI CODE ·</span>
-      <span>NO BUILD STEP · ONE HTML FILE · SCHEDULE 2.0 · LIVE NOW PLAYING · MADE IN THE BROWSER · TRY THE KONAMI CODE ·</span>
+      <span>NO BUILD STEP · ONE HTML FILE · SCHEDULE 2.0 · LIVE NOW PLAYING · MADE IN THE BROWSER · TRY THE KONAMI CODE · PRESS &#96; FOR A TERMINAL ·</span>
+      <span>NO BUILD STEP · ONE HTML FILE · SCHEDULE 2.0 · LIVE NOW PLAYING · MADE IN THE BROWSER · TRY THE KONAMI CODE · PRESS &#96; FOR A TERMINAL ·</span>
     </div>
   </div>
 
@@ -633,6 +697,173 @@
       setTimeout(() => toast.classList.remove('show'), 2600);
     }
   });
+
+  // terminal easter egg — press ` to open, no banner, just a bare prompt
+  (function(){
+    const overlay = document.getElementById('term-overlay');
+    const linesEl = document.getElementById('term-lines');
+    const body = document.getElementById('term-body');
+    const input = document.getElementById('term-input');
+    const closeBtn = document.getElementById('term-close');
+    let termOpen = false;
+    let cmdHistory = [];
+    let historyIdx = 0;
+
+    const PROJECTS = {
+      'schedule-2.0': { desc: "The big one. It's my class schedule, but actually good: day and week views, a countdown to your next period, and it shows you who else has the same classes as you.", url: 'https://github.com/berkisodd/schedule' },
+      'something-cool': { desc: "Basically a trailer for Schedule 2.0. It plays through the app scene by scene inside a phone frame. There's no video file, it's all CSS animation.", url: 'https://github.com/berkisodd/Something-cool' },
+      'terrain': { desc: "Turned my GitHub contribution graph into a little landscape. Weeks where I actually committed things stick up like mountains.", url: 'https://github.com/berkisodd/Terrain' },
+      'seemusic': { desc: "Put a song in and watch it move. Reads the actual frequencies coming out of the track and draws them in real time.", url: 'https://github.com/berkisodd/Seemusic' },
+      'notifications-test': { desc: "A test bench for notifications that got left up because it was useful.", url: 'https://github.com/berkisodd/Demo-notifications-test' },
+    };
+
+    function openTerm(){
+      if (termOpen) return;
+      termOpen = true;
+      overlay.hidden = false;
+      setTimeout(() => input.focus(), 0);
+    }
+    function closeTerm(){
+      termOpen = false;
+      overlay.hidden = true;
+    }
+
+    function escapeHtml(s){
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function printEcho(cmd){
+      const div = document.createElement('div');
+      div.className = 'line';
+      div.innerHTML = `<span class="term-user">berk@berk</span><span class="term-sep">:</span><span class="term-path">~</span><span class="term-dollar">$</span>${escapeHtml(cmd)}`;
+      linesEl.appendChild(div);
+    }
+    function printOut(text, cls){
+      text.split('\n').forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'line ' + (cls || 'out');
+        div.textContent = t;
+        linesEl.appendChild(div);
+      });
+    }
+
+    function runCommand(raw){
+      const cmd = raw.trim();
+      printEcho(raw);
+      if (cmd){
+        cmdHistory.push(cmd);
+        historyIdx = cmdHistory.length;
+        const [name, ...rest] = cmd.split(/\s+/);
+        const arg = rest.join(' ');
+        const lname = name.toLowerCase();
+        switch (lname){
+          case 'help':
+            printOut([
+              'available commands:',
+              '  help              show this',
+              "  whoami            who you're talking to",
+              '  ls                list projects',
+              "  cat <project>     read a project's notes",
+              '  open <project>    open a project on github',
+              '  neofetch          system info',
+              '  contact           get in touch',
+              '  clear             clear the screen',
+              '  exit              close this',
+            ].join('\n'));
+            break;
+          case 'whoami':
+            printOut("berk (probably — hard to verify over http)");
+            break;
+          case 'ls':
+            printOut(Object.keys(PROJECTS).map(k => k + '/').join('  '));
+            break;
+          case 'cat': {
+            const key = arg.replace(/\.txt$/i, '').toLowerCase();
+            const p = PROJECTS[key];
+            if (p) printOut(p.desc);
+            else printOut(`cat: ${arg || ''}: No such file or directory`, 'err');
+            break;
+          }
+          case 'open': {
+            const key = arg.toLowerCase();
+            const p = PROJECTS[key];
+            if (p){
+              printOut(`opening ${p.url} ...`);
+              window.open(p.url, '_blank', 'noopener');
+            } else printOut(`open: ${arg || ''}: no such project. try 'ls'.`, 'err');
+            break;
+          }
+          case 'neofetch':
+            printOut([
+              'berk@berk',
+              '---------',
+              "OS: BerkOS (it's a browser, don't tell anyone)",
+              'Host: whatever you’re reading this on',
+              'Kernel: vanilla-js 1.0.0',
+              'Shell: fake-bash 5.0',
+              'Terminal: this one',
+              'Projects: ' + Object.keys(PROJECTS).length,
+            ].join('\n'));
+            break;
+          case 'contact':
+            printOut('berkaktenlol@gmail.com');
+            break;
+          case 'date':
+            printOut(new Date().toString());
+            break;
+          case 'clear':
+            linesEl.innerHTML = '';
+            break;
+          case 'exit':
+            closeTerm();
+            break;
+          case 'konami':
+            printOut('hint: two ups, two downs, left, right, left, right, b, a.');
+            break;
+          case 'sudo':
+            printOut('berk is not in the sudoers file. this incident will be reported.', 'err');
+            break;
+          default:
+            printOut(`bash: ${name}: command not found`, 'err');
+        }
+      }
+      body.scrollTop = body.scrollHeight;
+    }
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter'){
+        const val = input.value;
+        input.value = '';
+        runCommand(val);
+      } else if (e.key === 'ArrowUp'){
+        e.preventDefault();
+        if (cmdHistory.length){
+          historyIdx = Math.max(0, historyIdx - 1);
+          input.value = cmdHistory[historyIdx] || '';
+        }
+      } else if (e.key === 'ArrowDown'){
+        e.preventDefault();
+        if (cmdHistory.length){
+          historyIdx = Math.min(cmdHistory.length, historyIdx + 1);
+          input.value = cmdHistory[historyIdx] || '';
+        }
+      } else if (e.key === 'Escape'){
+        closeTerm();
+      }
+    });
+
+    overlay.addEventListener('mousedown', e => {
+      if (e.target === overlay) closeTerm();
+    });
+    body.addEventListener('click', () => input.focus());
+    closeBtn.addEventListener('click', closeTerm);
+
+    window.addEventListener('keydown', e => {
+      if (e.key === '`' || e.key === '~'){
+        e.preventDefault();
+        termOpen ? closeTerm() : openTerm();
+      }
+    });
+  })();
 
   // footer clock
   function tickClock(){
