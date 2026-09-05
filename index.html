@@ -218,26 +218,6 @@
   .dc-username{color:var(--muted); font-weight:400; font-size:11.5px;}
   .dc-activity{color:var(--muted); font-weight:400;}
 
-  /* ── ticker ── */
-  .ticker{
-    width:100vw; margin-left:calc(50% - 50vw); margin-top:54px;
-    background:var(--acid); color:var(--ink);
-    border-top:2px solid var(--ink); border-bottom:2px solid var(--ink);
-    overflow:hidden; white-space:nowrap;
-  }
-  .ticker-track{
-    display:inline-flex; width:max-content;
-    animation:ticker-scroll 26s linear infinite;
-    font-family:var(--mono); font-weight:700; font-size:12.5px; letter-spacing:.08em; text-transform:uppercase;
-    padding:9px 0;
-  }
-  .ticker:hover .ticker-track{animation-play-state:paused;}
-  .ticker-track span{padding-right:28px;}
-  @keyframes ticker-scroll{
-    from{transform:translateX(0);}
-    to{transform:translateX(-50%);}
-  }
-
   /* ── sections ── */
   section{margin-top:76px;}
   .sec-head{
@@ -293,7 +273,6 @@
   @media (max-width:560px){
     header{padding:66px 0 46px;}
     .card{padding:18px 18px;}
-    .ticker{margin-top:40px;}
   }
   @media (prefers-reduced-motion:reduce){
     *{transition:none !important; animation:none !important;}
@@ -384,13 +363,6 @@
       </span>
     </a>
   </header>
-
-  <div class="ticker">
-    <div class="ticker-track">
-      <span>NO BUILD STEP · ONE HTML FILE · SCHEDULE 2.0 · LIVE NOW PLAYING · MADE IN THE BROWSER · TRY THE KONAMI CODE · PRESS &#96; FOR A TERMINAL ·</span>
-      <span>NO BUILD STEP · ONE HTML FILE · SCHEDULE 2.0 · LIVE NOW PLAYING · MADE IN THE BROWSER · TRY THE KONAMI CODE · PRESS &#96; FOR A TERMINAL ·</span>
-    </div>
-  </div>
 
   <section id="work">
     <div class="sec-head">
